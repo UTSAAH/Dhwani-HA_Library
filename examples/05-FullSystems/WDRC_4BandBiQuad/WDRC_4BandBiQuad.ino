@@ -40,18 +40,18 @@ AudioEffectCompressor_F32 compressor10(audio_settings);
 AudioOutputI2S_F32       audioOutI2S(audio_settings);
 
 //Create audio connections
-AudioConnection_F32      patchCord1(audioInI2S, 0, biquadL1, 0);
-AudioConnection_F32      patchCord2(audioInI2S, 0, biquadL2, 0);
-AudioConnection_F32      patchCord3(audioInI2S, 0, biquadL3, 0);
-AudioConnection_F32      patchCord4(audioInI2S, 0, biquadL4, 0);
+AudioConnection_F32      patchCord1(audioInI2S, 0, biquad1, 0);
+AudioConnection_F32      patchCord2(audioInI2S, 0, biquad2, 0);
+AudioConnection_F32      patchCord3(audioInI2S, 0, biquad3, 0);
+AudioConnection_F32      patchCord4(audioInI2S, 0, biquad4, 0);
 AudioConnection_F32      patchCord5(audioInI2S, 1, biquad5, 0);
 AudioConnection_F32      patchCord6(audioInI2S, 1, biquad6, 0);
 AudioConnection_F32      patchCord7(audioInI2S, 1, biquad7, 0);
 AudioConnection_F32      patchCord8(audioInI2S, 1, biquad8, 0);
-AudioConnection_F32      patchCord9(biquadL1, 0, compressor1, 0);
-AudioConnection_F32      patchCord10(biquadL2, 0, compressor2, 0);
-AudioConnection_F32      patchCord11(biquadL3, 0, compressor3, 0);
-AudioConnection_F32      patchCord12(biquadL4, 0, compressor4, 0);
+AudioConnection_F32      patchCord9(biquad1, 0, compressor1, 0);
+AudioConnection_F32      patchCord10(biquad2, 0, compressor2, 0);
+AudioConnection_F32      patchCord11(biquad3, 0, compressor3, 0);
+AudioConnection_F32      patchCord12(biquad4, 0, compressor4, 0);
 AudioConnection_F32      patchCord13(biquad5, 0, compressor5, 0);
 AudioConnection_F32      patchCord14(biquad6, 0, compressor6, 0);
 AudioConnection_F32      patchCord15(biquad7, 0, compressor7, 0);
@@ -69,32 +69,7 @@ AudioConnection_F32      patchCord26(mixer4_2, 0, compressor10, 0);
 AudioConnection_F32      patchCord27(compressor9, 0, audioOutI2S, 0);
 AudioConnection_F32      patchCord28(compressor10, 0, audioOutI2S, 1);
 
-biquad1.setLowpass(0, 500, 1.414);
-biquad5.setLowpass(0, 500, 1.414);
 
-biquad2.setBandpass(0, 1000, 1.414);
-biquad6.setBandpass(0, 1000, 1.414);
-
-biquad3.setBandpass(0, 2000, 1.414);
-biquad7.setBandpass(0, 2000, 1.414);
-
-biquad4.setHighpass(0, 4000, 1.414);
-biquad8.setHighpass(0, 4000, 1.414);
-
-compressor1.setDefaultValues(sample_rate_Hz);
-compressor2.setDefaultValues(sample_rate_Hz);
-compressor3.setDefaultValues(sample_rate_Hz);
-compressor4.setDefaultValues(sample_rate_Hz);
-compressor5.setDefaultValues(sample_rate_Hz);
-compressor6.setDefaultValues(sample_rate_Hz);
-compressor7.setDefaultValues(sample_rate_Hz);
-compressor8.setDefaultValues(sample_rate_Hz);
-
-mixer4_1.setDefaultValues(void);
-mixer4_2.setDefaultValues(void);
-
-compressor9.setDefaultValues(sample_rate_Hz);
-compressor10.setDefaultValues(sample_rate_Hz);
 
 //The setup function is called once when the system starts up
 float32_t input_gain_dB = 15.0;  //this is a good starting point
@@ -123,6 +98,33 @@ void setup(void) {
 	servicePotentiometer(millis(),0);
 	
 	//Put your own setup code here
+
+  biquad1.setLowpass(0, 500, 1.414);
+  biquad5.setLowpass(0, 500, 1.414);
+
+  biquad2.setBandpass(0, 1000, 1.414);
+  biquad6.setBandpass(0, 1000, 1.414);
+
+  biquad3.setBandpass(0, 2000, 1.414);
+  biquad7.setBandpass(0, 2000, 1.414);
+  
+  biquad4.setHighpass(0, 4000, 1.414);
+  biquad8.setHighpass(0, 4000, 1.414);
+  
+  compressor1.setDefaultValues(sample_rate_Hz);
+  compressor2.setDefaultValues(sample_rate_Hz);
+  compressor3.setDefaultValues(sample_rate_Hz);
+  compressor4.setDefaultValues(sample_rate_Hz);
+  compressor5.setDefaultValues(sample_rate_Hz);
+  compressor6.setDefaultValues(sample_rate_Hz);
+  compressor7.setDefaultValues(sample_rate_Hz);
+  compressor8.setDefaultValues(sample_rate_Hz);
+  
+  mixer4_1.setDefaultValues();
+  mixer4_2.setDefaultValues();
+  
+  compressor9.setDefaultValues(sample_rate_Hz);
+  compressor10.setDefaultValues(sample_rate_Hz);
 	
 	//End of setup
 	Serial.println("Setup complete.");
@@ -200,4 +202,3 @@ void printCPUandMemory(unsigned long curTime_millis, unsigned long updatePeriod_
 		lastUpdate_millis = curTime_millis; //we will use this value the next time around.
 	};
 };
-
