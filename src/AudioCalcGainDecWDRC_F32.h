@@ -124,7 +124,7 @@ class AudioCalcGainDecWDRC_F32 : public AudioStream_F32
         gain_at_exp_end_knee  = cr_const * exp_end_knee + tkgo;
       }
 
-      float exp_cr_const = 1.f-max(0.01f,exp_cr);
+      float exp_cr_const = 1.0/max(0.01,exp_cr) - 1.0;
       //for (k = 0; k < n; k++) {  //loop over each sample
 	  int subcounter = 0; int index_last_computed = 0;  //these are to effect the decimation so that it conly computes every decimate_factor points
       for (k = 0; k < n; k++) {  //loop over each sample
@@ -204,6 +204,7 @@ class AudioCalcGainDecWDRC_F32 : public AudioStream_F32
 	}
 	
 	float setMaxdB(float32_t _maxdB) { return maxdB = _maxdB; }
+	float getMaxdB(void) { return maxdB; }
 	float setKneeExpansion_dBSPL(float32_t _knee) { return exp_end_knee = _knee; }
 	float getKneeExpansion_dBSPL(void) { return exp_end_knee; }
 	float setExpansionCompRatio(float32_t _cr) { return exp_cr = _cr; }
@@ -211,6 +212,7 @@ class AudioCalcGainDecWDRC_F32 : public AudioStream_F32
 	float setKneeCompressor_dBSPL(float32_t _knee) { return tk = _knee; }
 	float getKneeCompressor_dBSPL(void) { return tk; }
 	float setCompRatio(float32_t _cr) { return cr = _cr; }
+	float getCompRatio(void) { return cr; }
 	float setKneeLimiter_dBSPL(float32_t _bolt) { return bolt = _bolt; }
 	float getKneeLimiter_dBSPL(void) { return bolt; }
 
