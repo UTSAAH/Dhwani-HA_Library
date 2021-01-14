@@ -1,7 +1,7 @@
 
 /*
   This Arduino/Tympan code was auto-generated using the Tympan Audio System Design Tool
-  
+
   The Tympan team hopes that you have fun with your audio hacking!
 */
 
@@ -134,25 +134,25 @@ void setup(void) {
 	//Start the USB serial link (to enable debugging)
 	Serial.begin(115200); delay(500);
 	Serial.println("Setup starting...");
-	
+
 	//Allocate dynamically shuffled memory for the audio subsystem
 	AudioMemory_F32_wSettings(20,audio_settings);  //allocate Float32 audio data blocks (primary memory used for audio processing)
-	
+
 	//Enable the Tympan to start the audio flowing!
 	audioHardware.enable(); // activate AIC
-	
+
 	//Choose the desired input
 	audioHardware.inputSelect(TYMPAN_INPUT_ON_BOARD_MIC);     // use the on board microphones
 	//audioHardware.inputSelect(TYMPAN_INPUT_JACK_AS_MIC);    // use the microphone jack - defaults to mic bias 2.5V
 	//audioHardware.inputSelect(TYMPAN_INPUT_JACK_AS_LINEIN); // use the microphone jack - defaults to mic bias OFF
-	
+
 	//Set the desired volume levels
 	audioHardware.volume_dB(vol_knob_gain_dB);    // headphone amplifier.  -63.6 to +24 dB in 0.5dB steps.
 	audioHardware.setInputGain_dB(input_gain_dB); // set input volume, 0-47.5dB in 0.5dB setps
-	
-	//service the potentiometer to get its current setting	
+
+	//service the potentiometer to get its current setting
 	servicePotentiometer(millis(),0);
-	
+
 	//Put your own setup code here
 
   biquad_l0.setLowpass(0, 125, 1.414);
@@ -169,7 +169,7 @@ void setup(void) {
 
   biquad_l4.setBandpass(0, 2000, 1.414);
   biquad_r4.setBandpass(0, 2000, 1.414);
-  
+
   biquad_l5.setHighpass(0, 4000, 1.414);
   biquad_r5.setHighpass(0, 4000, 1.414);
 
@@ -190,14 +190,14 @@ void setup(void) {
   compressor_r5.setDefaultValues(sample_rate_Hz);
 //  compressor_r6.setDefaultValues(sample_rate_Hz);
 //  compressor_r7.setDefaultValues(sample_rate_Hz);
-  
-  
+
+
   mixer8_l.setDefaultValues();
   mixer8_r.setDefaultValues();
-  
+
   compressor_l.setDefaultValues(sample_rate_Hz);
   compressor_r.setDefaultValues(sample_rate_Hz);
-	
+
 	//End of setup
 	Serial.println("Setup complete.");
 };
@@ -207,10 +207,10 @@ void setup(void) {
 //Note that the audio modules are called in the background.
 //They do not need to be serviced by the loop() function.
 void loop(void) {
-	
+
 	//periodically check the potentiometer
 	servicePotentiometer(millis(),100); //update every 100 msec
-	
+
 	//check to see whether to print the CPU and Memory Usage
 	printCPUandMemory(millis(),3000); //print every 3000 msec
 
@@ -224,25 +224,25 @@ void loop(void) {
 void servicePotentiometer(unsigned long curTime_millis, unsigned long updatePeriod_millis) {
 	static unsigned long lastUpdate_millis = 0;
 	static float prev_val = -1.0;
-	
+
 	//has enough time passed to update everything?
 	if (curTime_millis < lastUpdate_millis) lastUpdate_millis = 0; //handle wrap-around of the clock
 	if ((curTime_millis - lastUpdate_millis) > updatePeriod_millis) { //is it time to update the user interface?
-		
+
 		//read potentiometer (and quantize to reduce effects of noise)
 		float val = float(audioHardware.readPotentiometer()) / 1023.0; //0.0 to 1.0
 		val = (1.0/9.0) * (float)((int)(9.0 * val + 0.5)); //quantize so that it doesn't chatter...0 to 1.0
-		
+
 		//send the potentiometer value to your algorithm as a control parameter
 		if (abs(val - prev_val) > 0.05) { //is it different than before?
 			prev_val = val;  //save the value for comparison for the next time around
-			
+
 			//choose the desired gain value based on the knob setting
 			const float min_gain_dB = -40.0, max_gain_dB = 20.0; //set desired gain range
 			vol_knob_gain_dB = min_gain_dB + (max_gain_dB - min_gain_dB)*val; //computed desired gain value in dB
 			audioHardware.volume_dB(vol_knob_gain_dB); //command the new volume setting
 			Serial.print("servicePotentiometer: new volume dB = "); Serial.println(vol_knob_gain_dB); //print text to Serial port for debugging
-			
+
 			//Or, a better way to change volume is to change your algorithm gain, if you have such a block
 			//const float min_gain_dB = -20.0, max_gain_dB = 40.0; //set desired gain range
 			//vol_knob_gain_dB = min_gain_dB + (max_gain_dB - min_gain_dB)*val; //computed desired gain value in dB
@@ -270,7 +270,7 @@ void printCPUandMemory(unsigned long curTime_millis, unsigned long updatePeriod_
 		Serial.print("/");
 		Serial.print(AudioMemoryUsageMax_F32());
 		Serial.println();
-		
+
 		lastUpdate_millis = curTime_millis; //we will use this value the next time around.
 	};
 };

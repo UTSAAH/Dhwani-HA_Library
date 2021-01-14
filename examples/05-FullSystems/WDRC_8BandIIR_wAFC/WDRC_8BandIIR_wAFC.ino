@@ -7,19 +7,19 @@
 
   Purpose: Implements 3-band WDRC compressor with adaptive feedback cancelation (AFC)
       based on the work of BTNRH.
-    
+
   Filters: The BTNRH filterbank was implemented in the frequency-domain, whereas
     I implemented them in the time-domain via IIR filters.  Furthermore, I delay
     the individual IIR filters to try to line up their impulse response so that
     the overall frequency response is smoother because the phases are better aligned
     in the cross-over region between neighboring filters.
-   
+
   Compressor: The BTNRH WDRC compresssor did not include an expansion stage at low SPL.
     I added an expansion stage to better manage noise.
 
   Feedback Management: Implemented the BTNHRH adaptive feedback cancelation algorithm
     from their CHAPRO repository: https://github.com/BoysTownorg/chapro
-    
+
   Connectivity: Communicates via USB myTympan. and via Bluetooth myTympan.
 
   User Controls:
@@ -36,7 +36,7 @@
 #include "SerialManager.h"
 
 // Define the overall setup
-String overall_name = String("Tympan: 3-Band IIR WDRC with Adaptive Feedback Cancelation");
+String overall_name = String("Tympan: 8-Band IIR WDRC with Adaptive Feedback Cancelation");
 const int N_CHAN_MAX = 8;  //number of frequency bands (channels)
 int N_CHAN = N_CHAN_MAX;  //will be changed to user-selected number of channels later
 const float input_gain_dB = 15.0f; //gain on the microphone
@@ -44,7 +44,7 @@ float vol_knob_gain_dB = 0.0; //will be overridden by volume knob
 
 int USE_VOLUME_KNOB = 1;  //set to 1 to use volume knob to override the default vol_knob_gain_dB set a few lines below
 
-const float sample_rate_Hz = 22050.0f ; //16000, 24000 or 44117.64706f (or other frequencies in the table in AudioOutputI2S_F32
+const float sample_rate_Hz = 24000 ; //16000, 24000 or 44117.64706f (or other frequencies in the table in AudioOutputI2S_F32
 const int audio_block_samples = 16;  //do not make bigger than AUDIO_BLOCK_SAMPLES from AudioStream.h (which is 128)
 AudioSettings_F32   audio_settings(sample_rate_Hz, audio_block_samples);
 
@@ -80,7 +80,7 @@ int makeAudioConnections(void) { //call this in setup() or somewhere like that
   int count=0;
 
   //connect input
-  patchCord[count++] = new AudioConnection_F32(i2s_in, 0, audioTestGenerator, 0); 
+  patchCord[count++] = new AudioConnection_F32(i2s_in, 0, audioTestGenerator, 0);
 
   //make the connection for the audio test measurements
   patchCord[count++] = new AudioConnection_F32(audioTestGenerator, 0, audioTestMeasurement, 0);
@@ -137,7 +137,7 @@ void setupTympanHardware(void) {
   float cutoff_Hz = 40.0;  //set the default cutoff frequency for the highpass filter
   myTympan.setHPFonADC(true,cutoff_Hz,audio_settings.sample_rate_Hz); //set to false to disble
 
-  //Choose the desired audio input on the Typman...this will be overridden by the serviceMicDetect() in loop() 
+  //Choose the desired audio input on the Typman...this will be overridden by the serviceMicDetect() in loop()
   myTympan.inputSelect(TYMPAN_INPUT_ON_BOARD_MIC); // use the on-board micropphones
   //myTympan.inputSelect(TYMPAN_INPUT_JACK_AS_MIC); // use the microphone jack - defaults to mic bias 2.5V
   //myTympan.inputSelect(TYMPAN_INPUT_JACK_AS_LINEIN); // use the microphone jack - defaults to mic bias OFF
@@ -244,7 +244,7 @@ void setupFromDSLandGHAandAFC(const BTNRH_WDRC::CHA_DSL &this_dsl, const BTNRH_W
   }
 
   //setup the per-channel delays
-  for (int i=0; i<n_chan_max; i++) { 
+  for (int i=0; i<n_chan_max; i++) {
     postFiltDelay[i].setSampleRate_Hz(audio_settings.sample_rate_Hz);
     if (i < N_CHAN) {
       postFiltDelay[i].delay(0,all_matlab_sos_delay_msec[i]);  //from filter_coeff_sos.h.  milliseconds!!!
